@@ -1,0 +1,43 @@
+h1{
+text-align:center;
+
+}
+
+.container {
+display: flex;
+flex-direction: column;
+}
+.Childcontainer{
+display: flex;
+flex-direction: row-reverse;
+
+
+}
+
+#ChordsForm {
+
+width:60%;
+margin-left: 5%
+}
+#ChordsForm input {
+
+width:30%;
+
+}
+
+#ChordsForm .button{
+
+width:30%;
+
+
+}
+
+#BestSongBox{
+margin-right: 20%;
+
+}
+
+#BestSongBox h5{
+text-align: center;
+
+}
