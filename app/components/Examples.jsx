@@ -7,7 +7,7 @@ var Examples=(props)=>{
 <div>
   <h1> Exmple</h1>
 
-  </div>
+</div>
 
 
   )

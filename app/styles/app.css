@@ -2,6 +2,10 @@ h1{
 text-align:center;
 
 }
+body{
+background-color: #F4F4F4
+
+}
 
 .container {
 display: flex;
@@ -9,10 +13,22 @@ flex-direction: column;
 }
 .Childcontainer{
 display: flex;
-flex-direction: row-reverse;
+flex-direction:row;
 
 
 }
+#song{
+width: 70%;
+  background-color: white
+}
+#chords{
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 
 #ChordsForm {
 

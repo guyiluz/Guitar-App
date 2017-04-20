@@ -5,6 +5,7 @@ var Body = require('Body');
 var About = require('About');
 var Examples = require('Examples');
 var Main =require('Main')
+var Song =require('Song')
 
 //load diundatiun
 
@@ -15,10 +16,12 @@ $(document).foundation();
 require('style!css!applicationStyles')
 
 ReactDOM.render(
+
   <Router history={hashHistory}>
     <Route path="/" component={Main}>
       <Route path="about" component={About}/>
       <Route path="examples" component={Examples}/>
+      <Route path="song" component={Song} />
       <IndexRoute component={Body}/>
 
     </Route>

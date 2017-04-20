@@ -33,7 +33,12 @@ new webpack.ProvidePlugin({
       ChordsForm:'app/components/ChordsForm.jsx',
       BestSongBox:'app/components/BestSongBox.jsx',
       PopularSong:'app/components/PopularSong.jsx',
-      applicationStyles: 'app/styles/app.css'
+      applicationStyles: 'app/styles/app.css',
+      ChordsApi:'app/api/ChordsApi.js',
+      SongByIdAPI:'app/api/SongByIdAPI.js',
+      Song:'app/components/Song.jsx'
+
+
 
     },
     extensions: ['', '.js', '.jsx']

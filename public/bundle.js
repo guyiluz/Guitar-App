@@ -104,17 +104,18 @@
 	    hashHistory = _require.hashHistory;
 
 	var Body = __webpack_require__(229);
-	var About = __webpack_require__(232);
-	var Examples = __webpack_require__(233);
-	var Main = __webpack_require__(234);
+	var About = __webpack_require__(236);
+	var Examples = __webpack_require__(237);
+	var Main = __webpack_require__(238);
+	var Song = __webpack_require__(235);
 
 	//load diundatiun
 
-	__webpack_require__(236);
+	__webpack_require__(240);
 	$(document).foundation();
 
 	//App css
-	__webpack_require__(240);
+	__webpack_require__(244);
 
 	ReactDOM.render(React.createElement(
 	  Router,
@@ -124,6 +125,7 @@
 	    { path: '/', component: Main },
 	    React.createElement(Route, { path: 'about', component: About }),
 	    React.createElement(Route, { path: 'examples', component: Examples }),
+	    React.createElement(Route, { path: 'song', component: Song }),
 	    React.createElement(IndexRoute, { component: Body })
 	  )
 	), document.getElementById('app'));
@@ -25488,14 +25490,90 @@
 	'use strict';
 
 	var React = __webpack_require__(8);
-	var ChordsForm = __webpack_require__(230);
-	var BestSongBox = __webpack_require__(231);
-	var PopularSong = __webpack_require__(242);
+
+	var _require = __webpack_require__(166),
+	    Link = _require.Link,
+	    IndexLink = _require.IndexLink;
+
+	var ChordsApi = __webpack_require__(230);
+	var SongByIdAPI = __webpack_require__(231);
+	var ChordsForm = __webpack_require__(232);
+	var BestSongBox = __webpack_require__(233);
+	var PopularSong = __webpack_require__(234);
+	var Song = __webpack_require__(235);
 
 	var Body = React.createClass({
 	  displayName: 'Body',
 
+	  getInitialState: function getInitialState() {
+	    return {
+	      html: "x" };
+	  },
+
+	  // getting the html from the api using the id
+	  getBestSong: function getBestSong(id) {
+	    var that = this;
+	    console.log(id);
+	    SongByIdAPI(function (responed) {
+	      return responed.json().then(function (data) {
+	        console.log(data.title);
+	        var datahtml = data;
+
+	        that.setState({
+	          html: datahtml
+
+	        });
+	      });
+	    }, function (err) {
+	      console.log(err);
+	    }, id);
+	  },
+
+	  getsong: function getsong(song) {
+	    var that = this;
+	    console.log(song);
+	    ChordsApi(function (responed) {
+	      return responed.json().then(function (data) {
+	        var datahtml = data.objects[0].body_chords_html;
+	        that.setState({
+	          html: datahtml
+	        });
+	      });
+	    }, function (err) {
+	      console.log(err);
+	    }, song);
+	  },
+
+	  /// need to trun to ternary operator
+
+
+	  /*componentDidUpdate(prevProps, prevState) {
+	    // only update chart if the data has changed
+	    if (prevState.html !== this.state.html) {
+	  
+	      console.log("hi")
+	  
+	   }
+	  },
+	  */
 	  render: function render() {
+
+	    var data = this.state.html;
+	    var getsong = this.getsong;
+
+	    function rendringSong() {
+
+	      if (data == "x") {
+	        console.log(getsong);
+	        return React.createElement(ChordsForm, { getChords: getsong });
+	      }
+	      if (data !== "x") {
+	        var x = 3;
+	        console.log("done");
+
+	        return React.createElement(Song, { data: data });
+	      }
+	    }
 
 	    return React.createElement(
 	      'div',
@@ -25511,10 +25589,9 @@
 	        React.createElement(
 	          'div',
 	          { className: 'Childcontainer' },
-	          React.createElement(ChordsForm, null),
-	          React.createElement(BestSongBox, null)
-	        ),
-	        React.createElement(PopularSong, null)
+	          React.createElement(BestSongBox, { getId: this.getBestSong }),
+	          rendringSong()
+	        )
 	      )
 	    );
 	  }
@@ -25523,6 +25600,40 @@
 
 /***/ }),
 /* 230 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (responed, err, song) {
+	  var API_KEY = '4757f3c59400f40c94b735c033c2ed00e2f5e830';
+
+	  var myHeaders = new Headers();
+	  myHeaders.set('Guitarparty-Api-Key', API_KEY);
+	  var myInit = { headers: myHeaders };
+
+	  var pormise = fetch('http://api.guitarparty.com/v2/songs/?query=' + song + '', myInit);
+	  pormise.then(responed).catch(err);
+	};
+
+/***/ }),
+/* 231 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	module.exports = function (responed, err, id) {
+	  var API_KEY = '4757f3c59400f40c94b735c033c2ed00e2f5e830';
+
+	  var myHeaders = new Headers();
+	  myHeaders.set('Guitarparty-Api-Key', API_KEY);
+	  var myInit = { headers: myHeaders };
+
+	  var pormise = fetch('http://api.guitarparty.com/v2/songs/' + id + "/", myInit);
+	  pormise.then(responed).catch(err);
+	};
+
+/***/ }),
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -25532,7 +25643,13 @@
 	  displayName: 'ChordsForm',
 
 
+	  handleSearch: function handleSearch(e) {
+	    e.preventDefault();
+	    var song = this.refs.song.value;
+	    this.props.getChords(song);
+	  },
 	  render: function render() {
+
 	    return React.createElement(
 	      'div',
 	      { id: 'ChordsForm' },
@@ -25542,7 +25659,7 @@
 	        React.createElement('input', { type: 'search', placeholder: 'Find Song', ref: 'song' }),
 	        React.createElement(
 	          'button',
-	          { className: 'button primary' },
+	          { className: 'button primary', onClick: this.handleSearch },
 	          ' Search '
 	        )
 	      )
@@ -25554,29 +25671,50 @@
 	module.exports = ChordsForm;
 
 /***/ }),
-/* 231 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(8);
+
+	var _require = __webpack_require__(166),
+	    Link = _require.Link,
+	    IndexLink = _require.IndexLink;
+
 	var BestSongBox = React.createClass({
 	  displayName: 'BestSongBox',
 
+	  /// Get the id of the song after click
+	  handleCliclk: function handleCliclk(event) {
+	    var id = event.target.id;
+	    console.log(id);
+	    this.props.getId(id);
+	  },
 
 	  render: function render() {
 	    return React.createElement(
 	      'div',
-	      { id: 'BestSongBox' },
+	      { id: 'BestSongBox', onClick: this.handleCliclk },
 	      React.createElement(
 	        'h5',
 	        null,
-	        ' BestSongBox'
+	        ' Top Songs'
 	      ),
 	      React.createElement(
 	        'div',
-	        null,
-	        'Lorem ipsum dolor sit amet'
+	        { id: '23561' },
+	        'All of me'
+	      ),
+	      React.createElement(
+	        'div',
+	        { id: '1522' },
+	        'Starman'
+	      ),
+	      React.createElement(
+	        'div',
+	        { id: '1140' },
+	        'Wish You Were Here'
 	      ),
 	      React.createElement(
 	        'div',
@@ -25631,7 +25769,111 @@
 	module.exports = BestSongBox;
 
 /***/ }),
-/* 232 */
+/* 234 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(8);
+	var PopularSong = React.createClass({
+	  displayName: 'PopularSong',
+
+
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement(
+	        'h5',
+	        null,
+	        ' PopularSong'
+	      ),
+	      React.createElement(
+	        'p',
+	        null,
+	        'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+	      )
+	    );
+	  }
+
+	});
+
+	module.exports = PopularSong;
+
+/***/ }),
+/* 235 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(8);
+
+	var Song = React.createClass({
+	  displayName: "Song",
+
+
+	  render: function render() {
+	    var data = this.props.data;
+	    var chords = data.chords;
+
+	    function rCohrds() {
+	      var chordshtml = [];
+	      for (var i = 0; i < data.chords.length; i++) {
+	        console.log(data.chords[i].name);
+	        chordshtml.push(React.createElement(
+	          "div",
+	          null,
+	          data.chords[i].name,
+	          " ",
+	          React.createElement("img", { src: data.chords[i].image_url }),
+	          "  "
+	        ));
+	      }
+	      return chordshtml;
+	    }
+
+	    function createMarkup() {
+	      return { __html: data.body_chords_html };
+	    }
+
+	    //console.log(data.body_chords_html);
+
+	    return React.createElement(
+	      "div",
+	      { id: "song" },
+	      React.createElement(
+	        "div",
+	        { id: "chords" },
+	        rCohrds()
+	      ),
+	      React.createElement(
+	        "div",
+	        { classNam: "songContainer" },
+	        React.createElement(
+	          "h3",
+	          null,
+	          " ",
+	          data.title,
+	          " "
+	        ),
+	        React.createElement(
+	          "h4",
+	          null,
+	          " ",
+	          data.authors[0].name
+	        ),
+	        React.createElement("div", { dangerouslySetInnerHTML: createMarkup() })
+	      ),
+	      React.createElement("div", null)
+	    );
+	  }
+
+	});
+
+	module.exports = Song;
+
+/***/ }),
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -25686,7 +25928,7 @@
 	module.exports = About;
 
 /***/ }),
-/* 233 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -25711,13 +25953,13 @@
 	module.exports = Examples;
 
 /***/ }),
-/* 234 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(8);
-	var Nav = __webpack_require__(235);
+	var Nav = __webpack_require__(239);
 
 	var Main = function Main(props) {
 
@@ -25741,7 +25983,7 @@
 	module.exports = Main;
 
 /***/ }),
-/* 235 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -25769,7 +26011,7 @@
 	          React.createElement(
 	            'li',
 	            { className: 'menu-text' },
-	            'React MovieApp'
+	            'React Guitar Chords app'
 	          ),
 	          React.createElement(
 	            'li',
@@ -25777,7 +26019,7 @@
 	            React.createElement(
 	              IndexLink,
 	              { to: '/', activeClassName: 'active', activeStyle: { fontWeight: 'bold' } },
-	              'Get Movie '
+	              'Home'
 	            )
 	          ),
 	          React.createElement(
@@ -25812,13 +26054,13 @@
 	            React.createElement(
 	              'li',
 	              null,
-	              React.createElement('input', { type: 'search', placeholder: 'Get Movie by Title', ref: 'src' })
+	              React.createElement('input', { type: 'search', placeholder: 'Get Chords by Title', ref: 'src' })
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
 	              ' ',
-	              React.createElement('input', { type: 'submit', className: 'button secondary', value: 'Get Movie' })
+	              React.createElement('input', { type: 'submit', className: 'button secondary', value: 'Search' })
 	            )
 	          )
 	        )
@@ -25830,16 +26072,16 @@
 	module.exports = Nav;
 
 /***/ }),
-/* 236 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(237);
+	var content = __webpack_require__(241);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(239)(content, {});
+	var update = __webpack_require__(243)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -25856,10 +26098,10 @@
 	}
 
 /***/ }),
-/* 237 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(238)();
+	exports = module.exports = __webpack_require__(242)();
 	// imports
 
 
@@ -25870,7 +26112,7 @@
 
 
 /***/ }),
-/* 238 */
+/* 242 */
 /***/ (function(module, exports) {
 
 	/*
@@ -25926,7 +26168,7 @@
 
 
 /***/ }),
-/* 239 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/*
@@ -26178,16 +26420,16 @@
 
 
 /***/ }),
-/* 240 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(241);
+	var content = __webpack_require__(245);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(239)(content, {});
+	var update = __webpack_require__(243)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -26204,50 +26446,18 @@
 	}
 
 /***/ }),
-/* 241 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(238)();
+	exports = module.exports = __webpack_require__(242)();
 	// imports
 
 
 	// module
-	exports.push([module.id, "h1{\r\ntext-align:center;\r\n\r\n}\r\n\r\n.container {\r\ndisplay: flex;\r\nflex-direction: column;\r\n}\r\n.Childcontainer{\r\ndisplay: flex;\r\nflex-direction: row-reverse;\r\n\r\n\r\n}\r\n\r\n#ChordsForm {\r\n\r\nwidth:60%;\r\nmargin-left: 5%\r\n}\r\n#ChordsForm input {\r\n\r\nwidth:30%;\r\n\r\n}\r\n\r\n#ChordsForm .button{\r\n\r\nwidth:30%;\r\n\r\n\r\n}\r\n\r\n#BestSongBox{\r\nmargin-right: 20%;\r\n\r\n}\r\n\r\n#BestSongBox h5{\r\ntext-align: center;\r\n\r\n}\r\n", ""]);
+	exports.push([module.id, "h1{\r\ntext-align:center;\r\n\r\n}\r\nbody{\r\nbackground-color: #F4F4F4\r\n\r\n}\r\n\r\n.container {\r\ndisplay: flex;\r\nflex-direction: column;\r\n}\r\n.Childcontainer{\r\ndisplay: flex;\r\nflex-direction:row;\r\n\r\n\r\n}\r\n#song{\r\nwidth: 70%;\r\n  background-color: white\r\n}\r\n#chords{\r\n\r\n  display: flex;\r\n  flex-direction: row;\r\n  justify-content: center;\r\n  flex-wrap: wrap;\r\n}\r\n\r\n\r\n#ChordsForm {\r\n\r\nwidth:60%;\r\nmargin-left: 5%\r\n}\r\n#ChordsForm input {\r\n\r\nwidth:30%;\r\n\r\n}\r\n\r\n#ChordsForm .button{\r\n\r\nwidth:30%;\r\n\r\n\r\n}\r\n\r\n#BestSongBox{\r\nmargin-right: 20%;\r\n\r\n}\r\n\r\n#BestSongBox h5{\r\ntext-align: center;\r\n\r\n}\r\n", ""]);
 
 	// exports
 
-
-/***/ }),
-/* 242 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(8);
-	var PopularSong = React.createClass({
-	  displayName: 'PopularSong',
-
-
-	  render: function render() {
-	    return React.createElement(
-	      'div',
-	      null,
-	      React.createElement(
-	        'h5',
-	        null,
-	        ' PopularSong'
-	      ),
-	      React.createElement(
-	        'p',
-	        null,
-	        'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-	      )
-	    );
-	  }
-
-	});
-
-	module.exports = PopularSong;
 
 /***/ })
 /******/ ]);
