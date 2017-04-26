@@ -104,18 +104,17 @@
 	    hashHistory = _require.hashHistory;
 
 	var Body = __webpack_require__(229);
-	var About = __webpack_require__(236);
-	var Examples = __webpack_require__(237);
-	var Main = __webpack_require__(238);
-	var Song = __webpack_require__(235);
+	var About = __webpack_require__(239);
+	var Examples = __webpack_require__(240);
+	var Main = __webpack_require__(241);
 
 	//load diundatiun
 
-	__webpack_require__(240);
+	__webpack_require__(243);
 	$(document).foundation();
 
 	//App css
-	__webpack_require__(244);
+	__webpack_require__(247);
 
 	ReactDOM.render(React.createElement(
 	  Router,
@@ -125,7 +124,6 @@
 	    { path: '/', component: Main },
 	    React.createElement(Route, { path: 'about', component: About }),
 	    React.createElement(Route, { path: 'examples', component: Examples }),
-	    React.createElement(Route, { path: 'song', component: Song }),
 	    React.createElement(IndexRoute, { component: Body })
 	  )
 	), document.getElementById('app'));
@@ -25496,105 +25494,107 @@
 	    IndexLink = _require.IndexLink;
 
 	var ChordsApi = __webpack_require__(230);
-	var SongByIdAPI = __webpack_require__(231);
+	var ArtistByIdAPI = __webpack_require__(231);
 	var ChordsForm = __webpack_require__(232);
 	var BestSongBox = __webpack_require__(233);
 	var PopularSong = __webpack_require__(234);
-	var Song = __webpack_require__(235);
+	var Result = __webpack_require__(235);
 
 	var Body = React.createClass({
 	  displayName: 'Body',
 
 	  getInitialState: function getInitialState() {
 	    return {
-	      html: "x" };
+	      res: false,
+	      data: [],
+	      html: "x",
+	      check: false,
+	      song: "x"
+	    };
 	  },
 
-	  // getting the html from the api using the id
-	  getBestSong: function getBestSong(id) {
+	  getTitle: function getTitle(song) {
+	    console.log("song");
+	    this.setState({
+	      song: song
+
+	    });
+	  },
+
+	  getsong: function getsong(res, check) {
 	    var that = this;
-	    console.log(id);
-	    SongByIdAPI(function (responed) {
+	    console.log(res);
+	    var res = res;
+	    ArtistByIdAPI(function (responed) {
 	      return responed.json().then(function (data) {
-	        console.log(data.title);
-	        var datahtml = data;
-
+	        console.log(data);
 	        that.setState({
-	          html: datahtml
-
+	          data: data,
+	          res: true,
+	          html: "x",
+	          check: check
 	        });
 	      });
 	    }, function (err) {
 	      console.log(err);
-	    }, id);
+	    }, res, check);
 	  },
 
-	  getsong: function getsong(song) {
-	    var that = this;
-	    console.log(song);
-	    ChordsApi(function (responed) {
-	      return responed.json().then(function (data) {
-	        var datahtml = data.objects[0].body_chords_html;
-	        that.setState({
-	          html: datahtml
-	        });
-	      });
-	    }, function (err) {
-	      console.log(err);
-	    }, song);
-	  },
-
-	  /// need to trun to ternary operator
-
-
-	  /*componentDidUpdate(prevProps, prevState) {
-	    // only update chart if the data has changed
-	    if (prevState.html !== this.state.html) {
-	  
-	      console.log("hi")
-	  
-	   }
-	  },
-	  */
 	  render: function render() {
 
-	    var data = this.state.html;
-	    var getsong = this.getsong;
+	    var that = this;
+	    var _state = this.state,
+	        html = _state.html,
+	        res = _state.res,
+	        data = _state.data,
+	        check = _state.check,
+	        song = _state.song;
 
-	    function rendringSong() {
 
-	      if (data == "x") {
-	        console.log(getsong);
-	        return React.createElement(ChordsForm, { getChords: getsong });
+	    function renderFunctionB() {
+	      if (!res) {
+	        return false;
+	      } else {
+
+	        return React.createElement(
+	          'div',
+	          null,
+	          React.createElement(Result, { data: data, check: check, song: song, getTitle: that.getTitle })
+	        );
 	      }
-	      if (data !== "x") {
-	        var x = 3;
-	        console.log("done");
+	    }
+	    function renderFunction() {
+	      if (html == "x") {
 
-	        return React.createElement(Song, { data: data });
+	        return React.createElement(
+	          'div',
+	          null,
+	          React.createElement(
+	            'h1',
+	            null,
+	            ' Guitar Chords '
+	          ),
+	          React.createElement(
+	            'div',
+	            { className: 'container' },
+	            React.createElement(
+	              'div',
+	              { className: 'Childcontainer' },
+	              React.createElement(ChordsForm, { getChords: that.getsong })
+	            ),
+	            renderFunctionB()
+	          )
+	        );
 	      }
 	    }
 
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement(
-	        'h1',
-	        null,
-	        ' Guitar Chords '
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'container' },
-	        React.createElement(
-	          'div',
-	          { className: 'Childcontainer' },
-	          React.createElement(BestSongBox, { getId: this.getBestSong }),
-	          rendringSong()
-	        )
-	      )
+	      renderFunction()
 	    );
 	  }
+
 	});
 	module.exports = Body;
 
@@ -25621,14 +25621,16 @@
 
 	'use strict';
 
-	module.exports = function (responed, err, id) {
-	  var API_KEY = '4757f3c59400f40c94b735c033c2ed00e2f5e830';
+	module.exports = function (responed, err, res, check) {
+	  if (check) {
+	    console.log(res, check);
+	    var url = 'https://wrapapi.com/use/guyiluz/e-chords/Searchartist/0.0.1?artists=' + res + "/" + '&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj';
+	  } else {
+	    console.log(res, check);
+	    var url = "https://wrapapi.com/use/guyiluz/e-chords/Title/0.0.1?title=" + res + "&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj";
+	  }
 
-	  var myHeaders = new Headers();
-	  myHeaders.set('Guitarparty-Api-Key', API_KEY);
-	  var myInit = { headers: myHeaders };
-
-	  var pormise = fetch('http://api.guitarparty.com/v2/songs/' + id + "/", myInit);
+	  var pormise = fetch(url);
 	  pormise.then(responed).catch(err);
 	};
 
@@ -25639,14 +25641,17 @@
 	'use strict';
 
 	var React = __webpack_require__(8);
+
 	var ChordsForm = React.createClass({
 	  displayName: 'ChordsForm',
 
 
 	  handleSearch: function handleSearch(e) {
 	    e.preventDefault();
-	    var song = this.refs.song.value;
-	    this.props.getChords(song);
+	    var check = this.refs.check_me.checked;
+	    console.log(check);
+	    var res = this.refs.res.value;
+	    this.props.getChords(res, check);
 	  },
 	  render: function render() {
 
@@ -25656,7 +25661,14 @@
 	      React.createElement(
 	        'form',
 	        null,
-	        React.createElement('input', { type: 'search', placeholder: 'Find Song', ref: 'song' }),
+	        React.createElement('input', { type: 'search', placeholder: 'Find Song', ref: 'res' }),
+	        React.createElement(
+	          'div',
+	          { id: 'switch' },
+	          React.createElement('input', { type: 'checkbox', ref: 'check_me' }),
+	          'search BY artist'
+	        ),
+	        React.createElement('br', null),
 	        React.createElement(
 	          'button',
 	          { className: 'button primary', onClick: this.handleSearch },
@@ -25804,67 +25816,107 @@
 /* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	var React = __webpack_require__(8);
+	var ResultAPi = __webpack_require__(236);
+	var Song = __webpack_require__(237);
+	var Result = React.createClass({
+	  displayName: 'Result',
 
+
+	  handleTitle: function handleTitle(event) {
+	    var data = this.props.data;
+	    var getTitle = this.props.getTitle;
+	    var title = event.target.parentNode.id;
+	    getTitle(title);
+	    console.log(title);
+	  },
+
+	  render: function render() {
+
+	    var data = this.props.data;
+	    var check = this.props.check;
+	    var song = this.props.song;
+
+	    if (check) {
+	      var data = data.data.artice;
+	      var res = [];
+	      for (var i = 1; i < data.length; i++) {
+	        res.push(React.createElement(
+	          'div',
+	          { key: i },
+	          ' ',
+	          data[i]
+	        ));
+	      }
+	    }
+	    if (!check) {
+
+	      var data = data.data["Results "];
+	      var res = [];
+	      for (var i = 0; i < data.length; i++) {
+	        var title = data[i].Title;
+	        var artice = data[i].Artist;
+	        var x = title + "/" + artice;
+	        res.push(React.createElement(
+	          'div',
+	          { className: 'results', onClick: this.handleTitle, key: i },
+	          React.createElement(
+	            'div',
+	            { id: x },
+	            title
+	          ),
+	          ' - ',
+	          React.createElement(
+	            'div',
+	            null,
+	            artice
+	          )
+	        ));
+	      }
+	    }
+	    if (song !== "x") {
+	      console.log(song);
+
+	      return React.createElement(Song, { song: song });
+	    }
+
+	    return React.createElement(
+	      'div',
+	      { className: 'res' },
+	      res
+	    );
+	  }
+	});
+
+	module.exports = Result;
+
+/***/ }),
+/* 236 */
+/***/ (function(module, exports) {
+
+	"use strict";
+
+/***/ }),
+/* 237 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(8);
+	var SongAPI = __webpack_require__(238);
 	var Song = React.createClass({
-	  displayName: "Song",
+	  displayName: 'Song',
 
 
 	  render: function render() {
-	    var data = this.props.data;
-	    var chords = data.chords;
-
-	    function rCohrds() {
-	      var chordshtml = [];
-	      for (var i = 0; i < data.chords.length; i++) {
-	        console.log(data.chords[i].name);
-	        chordshtml.push(React.createElement(
-	          "div",
-	          null,
-	          data.chords[i].name,
-	          " ",
-	          React.createElement("img", { src: data.chords[i].image_url }),
-	          "  "
-	        ));
-	      }
-	      return chordshtml;
-	    }
-
-	    function createMarkup() {
-	      return { __html: data.body_chords_html };
-	    }
-
-	    //console.log(data.body_chords_html);
-
+	    var song = this.props.song;
+	    console.log(song);
 	    return React.createElement(
-	      "div",
-	      { id: "song" },
-	      React.createElement(
-	        "div",
-	        { id: "chords" },
-	        rCohrds()
-	      ),
-	      React.createElement(
-	        "div",
-	        { classNam: "songContainer" },
-	        React.createElement(
-	          "h3",
-	          null,
-	          " ",
-	          data.title,
-	          " "
-	        ),
-	        React.createElement(
-	          "h4",
-	          null,
-	          " ",
-	          data.authors[0].name
-	        ),
-	        React.createElement("div", { dangerouslySetInnerHTML: createMarkup() })
-	      ),
-	      React.createElement("div", null)
+	      'div',
+	      null,
+	      song
 	    );
 	  }
 
@@ -25873,7 +25925,32 @@
 	module.exports = Song;
 
 /***/ }),
-/* 236 */
+/* 238 */
+/***/ (function(module, exports) {
+
+	"use strict";
+
+	module.exports = function (responed, err, song) {
+
+	  function rep(str) {
+	    str.replace("(", "").replace(")", "").replace(/ /g, '-');
+
+	    return str;
+	  }
+	  song = song.split("/");
+
+	  var title = rep(song[0]);
+	  var artist = rep(song[1]);
+
+	  console.log("title:", title, "artist:", artist);
+
+	  var url = 'https://wrapapi.com/use/guyiluz/results-titile/Search_artists/0.0.1?artist=' + artist + '&title' + title + 'c&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj';
+	  var pormise = fetch(url);
+	  pormise.then(responed).catch(err);
+	};
+
+/***/ }),
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -25928,7 +26005,7 @@
 	module.exports = About;
 
 /***/ }),
-/* 237 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -25953,13 +26030,13 @@
 	module.exports = Examples;
 
 /***/ }),
-/* 238 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(8);
-	var Nav = __webpack_require__(239);
+	var Nav = __webpack_require__(242);
 
 	var Main = function Main(props) {
 
@@ -25983,7 +26060,7 @@
 	module.exports = Main;
 
 /***/ }),
-/* 239 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26072,16 +26149,16 @@
 	module.exports = Nav;
 
 /***/ }),
-/* 240 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(241);
+	var content = __webpack_require__(244);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(243)(content, {});
+	var update = __webpack_require__(246)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -26098,10 +26175,10 @@
 	}
 
 /***/ }),
-/* 241 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(242)();
+	exports = module.exports = __webpack_require__(245)();
 	// imports
 
 
@@ -26112,7 +26189,7 @@
 
 
 /***/ }),
-/* 242 */
+/* 245 */
 /***/ (function(module, exports) {
 
 	/*
@@ -26168,7 +26245,7 @@
 
 
 /***/ }),
-/* 243 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/*
@@ -26420,16 +26497,16 @@
 
 
 /***/ }),
-/* 244 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(245);
+	var content = __webpack_require__(248);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(243)(content, {});
+	var update = __webpack_require__(246)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -26446,15 +26523,15 @@
 	}
 
 /***/ }),
-/* 245 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(242)();
+	exports = module.exports = __webpack_require__(245)();
 	// imports
 
 
 	// module
-	exports.push([module.id, "h1{\r\ntext-align:center;\r\n\r\n}\r\nbody{\r\nbackground-color: #F4F4F4\r\n\r\n}\r\n\r\n.container {\r\ndisplay: flex;\r\nflex-direction: column;\r\n}\r\n.Childcontainer{\r\ndisplay: flex;\r\nflex-direction:row;\r\n\r\n\r\n}\r\n#song{\r\nwidth: 70%;\r\n  background-color: white\r\n}\r\n#chords{\r\n\r\n  display: flex;\r\n  flex-direction: row;\r\n  justify-content: center;\r\n  flex-wrap: wrap;\r\n}\r\n\r\n\r\n#ChordsForm {\r\n\r\nwidth:60%;\r\nmargin-left: 5%\r\n}\r\n#ChordsForm input {\r\n\r\nwidth:30%;\r\n\r\n}\r\n\r\n#ChordsForm .button{\r\n\r\nwidth:30%;\r\n\r\n\r\n}\r\n\r\n#BestSongBox{\r\nmargin-right: 20%;\r\n\r\n}\r\n\r\n#BestSongBox h5{\r\ntext-align: center;\r\n\r\n}\r\n", ""]);
+	exports.push([module.id, "h1{\r\ntext-align:center;\r\n\r\n}\r\nbody{\r\nbackground-color: #F4F4F4\r\n\r\n}\r\n\r\n.container {\r\ndisplay: flex;\r\nflex-direction: column;\r\n}\r\n.Childcontainer{\r\ndisplay: flex;\r\nflex-direction:row;\r\n\r\n\r\n}\r\n#song{\r\nwidth: 70%;\r\n  background-color: white\r\n}\r\n#chords{\r\n\r\n  display: flex;\r\n  flex-direction: row;\r\n  justify-content: center;\r\n  flex-wrap: wrap;\r\n}\r\n\r\n\r\n#ChordsForm {\r\n\r\nmargin: 0 auto;\r\n}\r\n#ChordsForm input {\r\n\r\n\r\n\r\n}\r\n\r\n#ChordsForm .button{\r\n\r\n\r\nmargin-left: 30%\r\n\r\n}\r\n\r\n#BestSongBox{\r\nmargin-right: 20%;\r\n\r\n}\r\n\r\n#BestSongBox h5{\r\ntext-align: center;\r\n\r\n}\r\n\r\n\r\n.results{\r\n\r\n  display: flex;\r\nflex-direction: row;\r\ntext-align: center;\r\n}\r\n.res{\r\n  text-align: center;\r\n}\r\n", ""]);
 
 	// exports
 

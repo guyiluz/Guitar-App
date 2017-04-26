@@ -1,116 +1,18 @@
-var React = require('react')
-var {Link, IndexLink} = require('react-router')
-var ChordsApi = require('ChordsApi')
-var SongByIdAPI = require('SongByIdAPI')
-var ChordsForm =require('ChordsForm')
-var BestSongBox =require('BestSongBox')
-var PopularSong =require('PopularSong')
-var Song =require('Song')
+Search:
+artists: //****http://www.e-chords.com/search-artists/bob;
+https://wrapapi.com/use/guyiluz/e-chords/Searchartist/0.0.1?artists=&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj
 
 
+Title: //http://www.e-chords.com/search-songs/bob
+https://wrapapi.com/use/guyiluz/e-chords/Title/0.0.1?title=creep&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj
+
+Results:
+title:  http://www.e-chords.com/chords/eagles/
+
+https://wrapapi.com/use/guyiluz/results-titile/Search_artists/0.0.1?artist=eagles&title=hotel-california-acoustic&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj
 
 
-var Body = React.createClass({
-getInitialState:function () {
-  return{
-   html:"x"  }
+artist:http://www.e-chords.com/radiohead
 
 
-},
-
-// getting the html from the api using the id
-getBestSong: function (id) {
-  var that =this
-  console.log(id);
-  SongByIdAPI(function(responed) {
-      return responed.json().then(function(data){
-console.log(data.title);
-        var datahtml= data.body_chords_html;
-
-             that.setState({
-             html: datahtml
-
-              })
-
-      })
-}, function (err) {
-  console.log(err);
-},id)
-
-
-  },
-
-
-  getsong: function (song) {
-    var that=this
-    console.log(song);
-    ChordsApi(function(responed) {
-      return responed.json().then(function(data){
-        var datahtml= data.objects[0].body_chords_html;
-        that.setState({
-          html:datahtml
-        })
-
-      })
-
-
-}, function (err) {
-  console.log(err);
-},song)
-
-
-
-},
-
-
-
-
-/// need to trun to ternary operator
-rendringSong: function () {
-var data =  this.state.html
-
-  if(data=="x"){
-return false
-
-
-
-  }
-  if(data!=="x") {
-    var x = 3
-    console.log("done");
-    return <song y={this.x}/>
-  }
-},
-
-
-componentDidUpdate(prevProps, prevState) {
-  // only update chart if the data has changed
-  if (prevState.html !== this.state.html) {
-    console.log("hi");
-   {this.rendringSong()}
-   window.location.hash ="#/song?_k=wcu2tz";
- }
-},
-
-  render:function(){
-
-  return (
-
-<div>
-  <h1> Guitar Chords </h1>
-
-  <div className="container">
-    <div className="Childcontainer">
-      <ChordsForm getChords={this.getsong}/>
-      <BestSongBox getId={this.getBestSong}/>
-      {this.rendringSong()}
-    </div>
-
-  </div>
-    </div>
-
-
-  )
-}
-})
-module.exports = Body;
+https://wrapapi.com/use/guyiluz/results-titile/Artist/0.0.1?artisit=radiohead&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj

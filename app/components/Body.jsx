@@ -1,11 +1,11 @@
 var React = require('react')
 var {Link, IndexLink} = require('react-router')
 var ChordsApi = require('ChordsApi')
-var SongByIdAPI = require('SongByIdAPI')
+var ArtistByIdAPI = require('ArtistByIdAPI')
 var ChordsForm =require('ChordsForm')
 var BestSongBox =require('BestSongBox')
 var PopularSong =require('PopularSong')
-var Song =require('Song')
+var Result =require('Result')
 
 
 
@@ -13,42 +13,39 @@ var Song =require('Song')
 var Body = React.createClass({
 getInitialState:function () {
   return{
-   html:"x"  }
+    res:false,
+    data:[],
+   html:"x",
+   check:false,
+   song:"x"
+       }
 
 
 },
 
-// getting the html from the api using the id
-getBestSong: function (id) {
-  var that =this
-  console.log(id);
-  SongByIdAPI(function(responed) {
-      return responed.json().then(function(data){
-console.log(data.title);
-        var datahtml= data;
 
-             that.setState({
-             html: datahtml
-
-              })
-
-      })
-}, function (err) {
-  console.log(err);
-},id)
+getTitle:function (song) {
+  console.log("song");
+  this.setState({
+  song:song
 
 
-  },
+  })
+},
 
 
-  getsong: function (song) {
+  getsong: function (res,check) {
     var that=this
-    console.log(song);
-    ChordsApi(function(responed) {
+    console.log(res);
+    var res =res
+    ArtistByIdAPI(function(responed) {
       return responed.json().then(function(data){
-        var datahtml= data.objects[0].body_chords_html;
+        console.log(data);
         that.setState({
-          html:datahtml
+          data:data,
+          res:true,
+          html:"x",
+          check:check
         })
 
       })
@@ -56,65 +53,69 @@ console.log(data.title);
 
 }, function (err) {
   console.log(err);
-},song)
+},res,check)
 
 
 
 },
 
-
-
-
-/// need to trun to ternary operator
-
-
-/*componentDidUpdate(prevProps, prevState) {
-  // only update chart if the data has changed
-  if (prevState.html !== this.state.html) {
-
-    console.log("hi")
-
- }
-},
-*/
   render:function(){
 
-  var data =  this.state.html
-  var getsong =this.getsong
 
 
-  function rendringSong() {
+    var that =this
+      var {html,res,data,check,song} = this.state
+
+function renderFunctionB() {
+  if(!res){
+  return false
+}else {
+
+  return(
+<div>
+    <Result data={data} check={check} song={song} getTitle={that.getTitle}  />
+</div>
+
+  )
+}
+}
+function renderFunction () {
+  if(html=="x"){
 
 
-      if(data=="x"){
-      console.log(getsong);
-      return   <ChordsForm getChords={getsong}/>
-      }
-      if(data!=="x") {
-        var x = 3
-        console.log("done");
 
-        return <Song data={data}/>
-      }
-    }
+  return(
+        <div>
+
+
+      <h1> Guitar Chords </h1>
+    <div className="container">
+      <div className="Childcontainer">
+       <ChordsForm getChords={that.getsong}/>
+        </div>
+       {renderFunctionB()}
+       </div>
+         </div>
+  )
+}
+
+
+
+}
 
   return (
-
 <div>
-  <h1> Guitar Chords </h1>
+ {renderFunction()}
+</div>
 
-  <div className="container">
-    <div className="Childcontainer">
 
-      <BestSongBox getId={this.getBestSong}/>
-       {rendringSong()}
-    </div>
 
-  </div>
-    </div>
+
+
 
 
   )
 }
+
 })
 module.exports = Body;

@@ -32,19 +32,18 @@ width: 70%;
 
 #ChordsForm {
 
-width:60%;
-margin-left: 5%
+margin: 0 auto;
 }
 #ChordsForm input {
 
-width:30%;
+
 
 }
 
 #ChordsForm .button{
 
-width:30%;
 
+margin-left: 30%
 
 }
 
@@ -56,4 +55,15 @@ margin-right: 20%;
 #BestSongBox h5{
 text-align: center;
 
+}
+
+
+.results{
+
+  display: flex;
+flex-direction: row;
+text-align: center;
+}
+.res{
+  text-align: center;
 }

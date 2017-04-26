@@ -35,7 +35,10 @@ new webpack.ProvidePlugin({
       PopularSong:'app/components/PopularSong.jsx',
       applicationStyles: 'app/styles/app.css',
       ChordsApi:'app/api/ChordsApi.js',
-      SongByIdAPI:'app/api/SongByIdAPI.js',
+      ArtistByIdAPI:'app/api/ArtistByIdAPI.js',
+      ResultAPi:'app/api/ResultAPi.js',
+      SongAPI:'app/api/SongAPI.js',
+      Result:'app/components/Result.jsx',
       Song:'app/components/Song.jsx'
 
 
