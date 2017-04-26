@@ -25509,7 +25509,8 @@
 	      data: [],
 	      html: "x",
 	      check: false,
-	      song: "x"
+	      song: "x",
+	      songHtml: "x"
 	    };
 	  },
 
@@ -25540,6 +25541,23 @@
 	    }, res, check);
 	  },
 
+	  goback: function goback(x) {
+	    console.log("gi");
+	    this.setState({
+	      songHtml: x
+
+	    });
+	  },
+
+	  getHtml: function getHtml(htmldata) {
+
+	    console.log("fromgettml", htmldata);
+	    this.setState({
+	      songHtml: htmldata
+
+	    });
+	  },
+
 	  render: function render() {
 
 	    var that = this;
@@ -25548,7 +25566,8 @@
 	        res = _state.res,
 	        data = _state.data,
 	        check = _state.check,
-	        song = _state.song;
+	        song = _state.song,
+	        songHtml = _state.songHtml;
 
 
 	    function renderFunctionB() {
@@ -25559,7 +25578,7 @@
 	        return React.createElement(
 	          'div',
 	          null,
-	          React.createElement(Result, { data: data, check: check, song: song, getTitle: that.getTitle })
+	          React.createElement(Result, { data: data, check: check, song: song, getTitle: that.getTitle, songHtml: songHtml, getHtml: that.getHtml, goback: that.goback })
 	        );
 	      }
 	    }
@@ -25821,6 +25840,7 @@
 	var React = __webpack_require__(8);
 	var ResultAPi = __webpack_require__(236);
 	var Song = __webpack_require__(237);
+	var SongAPI = __webpack_require__(238);
 	var Result = React.createClass({
 	  displayName: 'Result',
 
@@ -25828,9 +25848,31 @@
 	  handleTitle: function handleTitle(event) {
 	    var data = this.props.data;
 	    var getTitle = this.props.getTitle;
-	    var title = event.target.parentNode.id;
-	    getTitle(title);
-	    console.log(title);
+	    var song = event.target.parentNode.id;
+	    var songHtml = this.props.songHtml;
+	    var getHtml = this.props.getHtml;
+	    function rep(str) {
+	      str = str.replace("(", "").replace(")", "").replace(/ /g, '-').replace(".", "");
+
+	      return str;
+	    }
+	    song = song.split("/");
+	    var artist = rep(song[1]);
+	    var title = rep(song[0]);
+
+	    console.log("title:", title, "artist:", artist);
+
+	    SongAPI(function (responed) {
+
+	      return responed.json().then(function (data) {
+
+	        console.log(data);
+	        var data = data;
+	        getHtml(data);
+	      });
+	    }, function (err) {
+	      console.log(err);
+	    }, title, artist);
 	  },
 
 	  render: function render() {
@@ -25838,6 +25880,9 @@
 	    var data = this.props.data;
 	    var check = this.props.check;
 	    var song = this.props.song;
+	    var songHtml = this.props.songHtml;
+	    var getHtml = this.props.getHtml;
+	    var goback = this.props.goback;
 
 	    if (check) {
 	      var data = data.data.artice;
@@ -25876,10 +25921,11 @@
 	        ));
 	      }
 	    }
-	    if (song !== "x") {
-	      console.log(song);
+	    if (songHtml !== "x") {
 
-	      return React.createElement(Song, { song: song });
+	      console.log(songHtml);
+
+	      return React.createElement(Song, { songHtml: songHtml, goback: goback });
 	    }
 
 	    return React.createElement(
@@ -25902,21 +25948,57 @@
 /* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	var React = __webpack_require__(8);
-	var SongAPI = __webpack_require__(238);
-	var Song = React.createClass({
-	  displayName: 'Song',
 
+	var Song = React.createClass({
+	  displayName: "Song",
+
+
+	  back: function back() {
+	    var goback = this.props.goback;
+	    console.log("back");
+	    console.log(goback);
+	    goback("x");
+	  },
 
 	  render: function render() {
-	    var song = this.props.song;
-	    console.log(song);
+
+	    var songHTML = this.props.songHtml;
+
+	    var title = songHTML.data.output["0"].Title;
+	    var artist = songHTML.data.output["0"]["Artists "];
+	    var html = songHTML.data.output["0"].Body;
+	    console.log(typeof html === "undefined" ? "undefined" : _typeof(html));
+
+	    function createMarkup() {
+
+	      return { __html: html };
+	    }
+
 	    return React.createElement(
-	      'div',
+	      "div",
 	      null,
-	      song
+	      React.createElement(
+	        "button",
+	        { className: "button primary", onClick: this.back },
+	        "Back"
+	      ),
+	      React.createElement(
+	        "h3",
+	        null,
+	        artist
+	      ),
+	      React.createElement(
+	        "h4",
+	        null,
+	        title,
+	        "  "
+	      ),
+	      React.createElement("div", { dangerouslySetInnerHTML: createMarkup() })
 	    );
 	  }
 
@@ -25930,23 +26012,13 @@
 
 	"use strict";
 
-	module.exports = function (responed, err, song) {
+	module.exports = function (responed, err, title, artist) {
 
-	  function rep(str) {
-	    str.replace("(", "").replace(")", "").replace(/ /g, '-');
+	    console.log("title:", title, "artist:", artist);
 
-	    return str;
-	  }
-	  song = song.split("/");
-
-	  var title = rep(song[0]);
-	  var artist = rep(song[1]);
-
-	  console.log("title:", title, "artist:", artist);
-
-	  var url = 'https://wrapapi.com/use/guyiluz/results-titile/Search_artists/0.0.1?artist=' + artist + '&title' + title + 'c&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj';
-	  var pormise = fetch(url);
-	  pormise.then(responed).catch(err);
+	    var url = 'https://wrapapi.com/use/guyiluz/results-titile/Search_artists/0.0.1?artist=' + artist + '&title=' + title + '&wrapAPIKey=IdGeqWNwKghBeuIrihaE1p8R7ycpZejj';
+	    var pormise = fetch(url);
+	    pormise.then(responed).catch(err);
 	};
 
 /***/ }),
